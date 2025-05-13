@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eleventy 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: white;
+      padding: 2rem;
+      background-color: #333333;
+    }
+    h1 {
+      color: white;
+    }
+    label, input, button {
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
+    }
+    #result {
+      margin-top: 1rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: left;
+}
+th {
+  background-color: #eee;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+th, td {
+  border: 2px solid #ccc;
+  padding: 0.5rem;
+  text-align: left;
+}
+th {
+  background-color: #000000;
+  color: #FFFF33;
+}
+  </style>
+</head>
+<body>
+  <h1>QUORUM OF THE 12</h1>
+    <label for="dateInput">Enter any date to see the members of the Quorum of the Twelve of the Church of Jesus Christ of Latter-day Saints (in order of seniority) on that date:</label><br/>
+  <input type="date" id="dateInput"/>
+  <button onclick="checkAlive()">Check</button>
+
+  <!--display on website-->
+    <strong>Snapshot of the Q12 on that day:</strong>
+<table id="resultTable">
+  <thead>
+    <tr>
+      <th>seniority</th>
+      <th>name</th>
+      <th>added</th>
+      <th>removed</th>
+      <th>bday</th>
+      <th>Tenure</th>
+      <th>Age</th>
+          </tr>
+  </thead>
+  <tbody id="resultBody">
+    <!-- Rows will be inserted here -->
+  </tbody>
+</table>
+<div id="averTenureTenure"></div>
+
+  <script>
+    <!--database-->
+    const people = [
+      {name: "1. Thomas B. Marsh", added: "1835-04-25", removed: "1839-03-17", bday: "1800-11-01"},
+      {name: "2. David W. Patten", added: "1835-02-15", removed: "1838-10-25", bday: "1799-11-14"},
+        {name: "3. Brigham Young", added: "1835-02-14", removed: "1877-08-29", bday:"1801-06-01"},
+        {name: "4. Heber C. Kimball", added: "1835-02-14", removed: "1868-06-22", bday: "1801-06-14"},
+        {name: "5. Orson Hyde", added: "1835-02-15", removed: "1878-11-28", bday: "1805-01-08"},
+        {name: "6. William E. McLellan", added: "1835-02-15", removed: "1838-05-11", bday: "1806-01-18"},
+        {name: "7. Parley P. Pratt", added: "1835-02-21", removed: "1857-05-13", bday: "1807-04-12"},
+        {name: "8. Luke S. Johnson", added: "1835-02-15", removed: "1838-04-13", bday: "1807-11-03"},
+        {name: "9. William B. Smith", added: "1835-02-15", removed: "1845-10-06", bday: "1811-03-13"},
+        {name: "10. Orson Pratt", added: "1835-04-26", removed: "1881-10-03", bday: "1811-09-19"},
+        {name: "11. John F. Boynton", added: "1835-02-15", removed: "1837-09-03", bday: "1811-09-20"},
+        {name: "12. Lyman E. Johnson", added: "1835-02-14", removed: "1838-04-13", bday: "1811-10-24"},
+        {name: "13. John E. Page", added: "1838-12-19", removed: "1846-02-09", bday: "1799-02-25"},
+        {name: "14. John Taylor", added: "1838-12-19", removed: "1887-07-25", bday: "1808-11-01"},
+        {name: "15. Wilford Woodruff", added: "1839-04-26", removed: "1898-09-02", bday: "1807-03-01"},
+        {name: "16. George A. Smith", added: "1839-04-26", removed: "1875-09-01", bday: "1817-06-26"},
+        {name: "17. Willard Richards", added: "1840-04-14", removed: "1854-03-11", bday: "1804-06-24"},
+        {name: "18. Lyman Wight", added: "1841-04-08", removed: "1848-12-03", bday: "1796-05-09"},
+        {name: "19. Amasa Lyman", added: "1842-08-20", removed: "1867-10-06", bday: "1813-03-30"},
+        {name: "20. Ezra T. Benson", added: "1846-07-16", removed: "1869-09-03", bday: "1811-02-22"},
+        {name: "21. Charles C. Rich", added: "1849-02-12", removed: "1883-11-17", bday: "1809-08-21"},
+        {name: "22. Lorenzo Snow", added: "1849-02-12", removed: "1901-10-01", bday: "1814-04-03"},
+        {name: "23. Erastus Snow", added: "1849-02-12", removed: "1888-05-27", bday: "1818-11-09"},
+        {name: "24. Franklin D. Richards", added: "1849-02-12", removed: "1899-12-09", bday: "1821-04-02"},
+        {name: "25. George Q. Cannon", added: "1860-08-26", removed: "1901-04-12", bday: "1821-01-11"},
+        {name: "26. Joseph F. Smith", added: "1867-10-08", removed: "1918-11-19", bday: "1838-11-13"},
+        {name: "27. Brigham Young Jr.", added: "1868-10-09", removed: "1903-04-11", bday: "1836-12-18"},
+        {name: "28. Albert Carrington", added: "1870-07-03", removed: "1885-11-07", bday: "1813-01-08"},
+        {name: "29. Moses Thatcher", added: "1879-04-07", removed: "1896-04-06", bday: "1842-02-02"},
+        {name: "30. Francis M. Lyman", added: "1880-10-27", removed: "1916-11-18", bday: "1840-01-12"},
+        {name: "31. John Henry Smith", added: "1880-10-27", removed: "1911-10-13", bday: "1848-09-18"},
+        {name: "32. George Teasdale", added: "1882-10-16", removed: "1907-06-09", bday: "1831-12-08"},
+        {name: "33. Heber J. Grant", added: "1882-10-16", removed: "1945-05-14", bday: "1856-11-22"},
+        {name: "34. John W. Taylor", added: "1884-04-09", removed: "1905-10-28", bday: "1858-05-15"},
+        {name: "35. Marriner W. Merrill", added: "1889-10-07", removed: "1906-02-06", bday: "1832-09-25"},
+        {name: "36. Anthon H. Lund", added: "1889-10-07", removed: "1921-03-02", bday: "1844-05-15"},
+        {name: "37. Abraham H. Cannon", added: "1889-10-07", removed: "1896-07-19", bday: "1859-03-12"},
+        {name: "38. Matthias F. Cowley", added: "1896-10-07", removed: "1905-10-28", bday: "1858-08-25"},
+{name: "39. Abraham O. Woodruff", added: "1896-10-07", removed: "1904-06-04", bday: "1872-11-23"},
+{name: "40. Rudger Clawson", added: "1898-10-10", removed: "1943-06-21", bday: "1857-03-12"},
+{name: "41. Reed Smoot", added: "1900-04-08", removed: "1941-02-09", bday: "1862-01-10"},
+{name: "42. Hyrum M. Smith", added: "1901-10-24", removed: "1918-01-23", bday: "1872-03-21"},
+{name: "43. George Albert Smith", added: "1903-10-08", removed: "1951-04-04", bday: "1870-04-04"},
+{name: "44. Charles W. Penrose", added: "1904-07-07", removed: "1925-05-16", bday: "1832-02-04"},
+{name: "45. George F. Richards", added: "1906-04-09", removed: "1950-08-08", bday: "1861-02-23"},
+{name: "46. Orson F. Whitney", added: "1906-04-09", removed: "1931-05-16", bday: "1855-07-01"},
+{name: "47. David O. McKay", added: "1906-04-09", removed: "1970-01-18", bday: "1873-09-08"},
+{name: "48. Anthony W. Ivins", added: "1907-10-06", removed: "1934-09-23", bday: "1852-09-16"},
+{name: "49. Joseph Fielding Smith", added: "1910-04-04", removed: "1972-07-02", bday: "1876-07-19"},
+{name: "50. James E. Talmage", added: "1911-12-08", removed: "1933-07-27", bday: "1862-09-21"},
+{name: "51. Stephen L Richards", added: "1917-01-18", removed: "1959-05-19", bday: "1879-06-18"},
+{name: "52. Richard R. Lyman", added: "1918-04-07", removed: "1943-11-12", bday: "1870-11-23"},
+{name: "53. Melvin J. Ballard", added: "1919-01-07", removed: "1939-07-30", bday: "1873-02-09"},
+{name: "54. John A. Widtsoe", added: "1921-03-17", removed: "1952-11-29", bday: "1872-01-31"},
+{name: "55. Joseph F. Merrill", added: "1931-10-09", removed: "1952-02-03", bday: "1868-08-24"},
+{name: "56. Charles A. Callis", added: "1933-10-12", removed: "1947-01-21", bday: "1865-05-04"},
+{name: "57. J. Reuben Clark", added: "1934-10-11", removed: "1961-10-06", bday: "1871-09-01"},
+{name: "58. Alonzo A. Hinckley", added: "1934-10-11", removed: "1936-12-22", bday: "1870-04-23"},
+{name: "59. Albert E. Bowen", added: "1937-04-08", removed: "1953-07-15", bday: "1875-10-31"},
+{name: "60. Sylvester Q. Cannon", added: "1939-10-06", removed: "1943-05-29", bday: "1877-06-10"},
+{name: "61. Harold B. Lee", added: "1941-04-10", removed: "1973-12-26", bday: "1899-03-28"},
+{name: "62. Spencer W. Kimball", added: "1943-10-07", removed: "1985-11-05", bday: "1895-03-28"},
+{name: "63. Ezra Taft Benson", added: "1943-10-07", removed: "1994-05-30", bday: "1899-08-04"},
+{name: "64. Mark E. Petersen", added: "1944-04-20", removed: "1984-01-11", bday: "1900-11-07"},
+{name: "65. Matthew Cowley", added: "1945-10-11", removed: "1953-12-13", bday: "1897-08-02"},
+{name: "66. Henry D. Moyle", added: "1947-04-10", removed: "1963-09-18", bday: "1889-04-22"},
+{name: "67. Delbert L. Stapley", added: "1950-10-05", removed: "1978-08-19", bday: "1896-12-11"},
+{name: "68. Marion G. Romney", added: "1951-10-11", removed: "1988-05-20", bday: "1897-09-19"},
+{name: "69. LeGrand Richards", added: "1952-04-10", removed: "1983-01-11", bday: "1886-02-06"},
+{name: "70. Adam S. Bennion", added: "1953-04-09", removed: "1958-02-11", bday: "1886-12-02"},
+{name: "71. Richard L. Evans", added: "1953-10-08", removed: "1971-11-01", bday: "1906-03-23"},
+{name: "72. George Q. Morris", added: "1954-04-08", removed: "1962-04-23", bday: "1874-02-20"},
+{name: "73. Hugh B. Brown", added: "1958-04-10", removed: "1975-12-02", bday: "1883-10-24"},
+{name: "74. Howard W. Hunter", added: "1959-10-15", removed: "1995-03-03", bday: "1907-11-14"},
+{name: "75. Gordon B. Hinckley", added: "1961-10-05", removed: "2008-01-27", bday: "1910-06-23"},
+{name: "76. N. Eldon Tanner", added: "1962-10-11", removed: "1982-11-27", bday: "1898-05-09"},
+{name: "77. Thomas S. Monson", added: "1963-10-04", removed: "2018-01-02", bday: "1927-08-21"},
+{name: "78. Boyd K. Packer", added: "1970-04-06", removed: "2015-07-03", bday: "1924-09-10"},
+{name: "79. Marvin J. Ashton", added: "1971-12-02", removed: "1994-02-25", bday: "1915-05-06"},
+{name: "80. Bruce R. McConkie", added: "1972-10-12", removed: "1985-04-19", bday: "1915-07-29"},
+{name: "81. L. Tom Perry", added: "1974-04-06", removed: "2015-05-30", bday: "1922-08-05"},
+{name: "82. David B. Haight", added: "1976-01-08", removed: "2004-07-31", bday:"1906-09-02"},
+{name: "83. James E. Faust", added: "1978-09-30", removed: "2007-08-10", bday:"1920-07-31"},
+{name: "84. Neal A. Maxwell", added: "1981-07-23", removed: "2004-07-21", bday:"1926-07-06"},
+{name: "85. Russell M. Nelson", added: "1984-04-12", removed: "", bday:"1924-09-09"},
+{name: "86. Dallin H. Oaks", added: "1984-05-03", removed: "", bday:"1932-08-12"},
+{name: "87. M. Russell Ballard", added: "1985-10-10", removed: "2023-11-12", bday:"1928-10-08"},
+{name: "88. Joseph B. Wirthlin", added: "1986-10-09", removed: "2008-12-01", bday:"1917-06-11"},
+{name: "89. Richard G. Scott", added: "1988-10-06", removed: "2015-09-22", bday:"1928-11-07"},
+{name: "90. Robert D. Hales", added: "1994-04-02", removed: "2017-10-01", bday:"1932-08-24"},
+{name: "91. Jeffrey R. Holland", added: "1994-06-23", removed: "", bday:"1940-12-03"},
+{name: "92. Henry B. Eyring", added: "1995-04-01", removed: "", bday:"1933-05-31"},
+{name: "93. Dieter F. Uchtdorf", added: "2004-10-02", removed: "", bday:"1940-11-06"},
+{name: "94. David A. Bednar", added: "2004-10-02", removed: "", bday:"1952-06-15"},
+{name: "95. Quentin L. Cook", added: "2007-10-06", removed: "", bday:"1940-09-08"},
+{name: "96. D. Todd Christofferson", added: "2008-04-05", removed: "", bday:"1945-01-24"},
+{name: "97. Neil L. Andersen", added: "2009-04-04", removed: "", bday:"1951-08-09"},
+{name: "98. Ronald A. Rasband", added: "2015-10-03", removed: "", bday:"1951-02-06"},
+{name: "99. Gary E. Stevenson", added: "2015-10-03", removed: "", bday:"1955-08-06"},
+{name: "100. Dale G. Renlund", added: "2015-10-03", removed: "", bday:"1952-11-13"},
+{name: "101. Gerrit W. Gong", added: "2018-03-31", removed: "", bday:"1953-12-23"},
+{name: "102. Ulisses Soares", added: "2018-03-31", removed: "", bday:"1958-10-02"},
+{name: "103. Patrick Kearon", added: "2023-12-07", removed: "", bday: "1961-07-18"}
+    ];
+
+  function calculateTenure(addedDate, currentDate) {
+  const diffTime = currentDate - addedDate;
+  const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25); // Average year length including leap years
+  return parseFloat(diffYears.toFixed(1));
+}
+
+//my attempt at age calc, might need to delete
+function calculateAge(birthday, currentDate) {
+  const diffTime = currentDate - birthday;
+  const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+  return parseFloat(diffYears.toFixed(1));
+}
+//attempt finished
+
+function checkAlive() {
+  const inputDate = new Date(document.getElementById("dateInput").value);
+  const tableBody = document.getElementById("resultBody");
+  const averTenureDiv = document.getElementById("averTenureTenure");
+
+  // Clear previous results
+  tableBody.innerHTML = "";
+  averTenureDiv.innerHTML = "";
+
+  if (!inputDate.getTime()) {
+    averTenureDiv.innerHTML = "Please enter a valid date.";
+    return;
+  }
+
+  const alive = people.filter(person => {
+    const added = new Date(person.added);
+    const removed = person.removed ? new Date(person.removed) : new Date();
+    return inputDate >= added && inputDate <= removed;
+  });
+
+  if (alive.length > 0) {
+    alive.forEach((p, index) => {
+      const added = new Date(p.added);
+      const removed = new Date(p.removed);
+      const Tenure = calculateTenure(added, inputDate);
+const age = calculateAge(new Date(p.bday), inputDate);
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+  <td>${index + 1}</td>
+  <td>${p.name}</td>
+  <td>${p.added}</td>
+  <td>${p.removed}</td>
+  <td>${p.bday}</td>
+  <td>${Tenure}</td>
+  <td>${age}</td>
+  `;
+      tableBody.appendChild(row);
+    });
+
+    const totalTenure = alive.reduce((sum, p) => {
+      return sum + calculateTenure(new Date(p.added), inputDate);
+    }, 0);
+
+    const averTenureTenure = (totalTenure / alive.length).toFixed(1);
+const totalAge = alive.reduce((sum, p) => {
+  return sum + calculateAge(new Date(p.bday), inputDate);
+}, 0);
+const averageAge = (totalAge / alive.length).toFixed(1);
+
+averTenureDiv.innerHTML = `
+  <strong>Total Tenure:</strong> ${totalTenure.toFixed(1)} years<br>
+  <strong>Average Tenure:</strong> <strong>${averTenureTenure} years</strong><br>
+  <strong>Total Age:</strong> ${totalAge.toFixed(1)} years<br>
+  <strong>Average Age:</strong> <strong>${averageAge} years</strong>
+`;
+  } else {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td colspan="5">${inputDate.toDateString()} is outside of the acceptable date range.</td>`;
+    tableBody.appendChild(row);
+  }
+}
+  </script>
+ 
+</body>
+</html>
